@@ -35,52 +35,57 @@ public class Route {
         }
 
         System.out.println("Reached ZZZ in " + steps + " steps");
-        int result = part2Solution(map, directions);
+        long result = part2Solution(map, directions);
         System.out.println("Part 2 answer:" + result);
     }
 
-    public static int part2Solution(HashMap<String, String[]> map, String directions) {
+    public static long part2Solution(HashMap<String, String[]> map, String directions) {
         List<String> currentNodes = new ArrayList<>();
+        int steps;
+        List<Integer> allSteps = new ArrayList<>();
         for (String key : map.keySet()) {
             if (key.endsWith("A")) {
                 currentNodes.add(key);
             }
         }
+        for (String str : currentNodes) {
+            steps = 0;
+            int directionIndex = 0;
+            String curr = str;
+            while (!curr.endsWith("Z")) {
+                String[] nextNodes = map.get(curr);
+                if (nextNodes == null) {
+                    System.out.println("No path found from " + curr);
 
-        int steps = 0;
-        boolean allNodesEndWithZ;
-        do {
-            allNodesEndWithZ = true;
-            List<String> nextNodes = new ArrayList<>();
-            char direction = directions.charAt(steps % directions.length());
-
-            for (String node : currentNodes) {
-                String[] next = map.get(node);
-                if (next == null)
-                    continue; // Skip if no mapping found
-
-                String nextNode = direction == 'L' ? next[0] : next[1];
-                nextNodes.add(nextNode);
-                if (!nextNode.endsWith("Z")) {
-                    allNodesEndWithZ = false;
                 }
+                char direction = directions.charAt(directionIndex);
+                curr = direction == 'L' ? nextNodes[0] : nextNodes[1];
+                directionIndex = (directionIndex + 1) % directions.length();
+                steps++;
             }
+            allSteps.add(steps);
+        }
 
-            currentNodes = nextNodes;
-            steps++;
-        } while (!allNodesEndWithZ);
-
-        return steps;
+        return lcmOfList(allSteps);
     }
 
-    public static boolean checkEndsWithZ(String[] arr) {
-        int count = 0;
-        for (String str : arr) {
-            if (str.endsWith("Z")) {
-                count++;
-            }
+    private static long lcm(long a, int b) {
+        return a * (b / gcd(a, b));
+    }
+
+    private static long gcd(long a, long b) {
+        if (b == 0) {
+            return a;
         }
-        return count == arr.length;
+        return gcd(b, a % b);
+    }
+
+    public static long lcmOfList(List<Integer> numbers) {
+        long result = numbers.get(0);
+        for (int i = 1; i < numbers.size(); i++) {
+            result = lcm(result, numbers.get(i));
+        }
+        return result;
     }
 
     public static void processLine(String line, HashMap<String, String[]> map) {
